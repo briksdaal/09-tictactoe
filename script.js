@@ -1,3 +1,5 @@
+const BOARDLENGTH = 3;
+
 const Cell = () => {
   let value = '-';
 
@@ -17,8 +19,8 @@ const Cell = () => {
 };
 
 const GameBoard = (() => {
-  const rows = 3;
-  const cols = 3;
+  const rows = BOARDLENGTH;
+  const cols = BOARDLENGTH;
   const board = [];
 
   for (let i = 0; i < rows; i += 1) {
@@ -59,8 +61,10 @@ const player22 = Player('Gary', 'O');
 
 const GameController = ((player1, player2) => {
   const board = GameBoard;
-  let isGameOver = false;
   let activePlayer = player1;
+  let isGameOver = false;
+  let isTie = false;
+  let movesMade = 0;
 
   const waitingPlayer = () => (activePlayer === player1 ? player2 : player1);
 
@@ -75,21 +79,50 @@ const GameController = ((player1, player2) => {
     console.log(`${activePlayer.name}'s turn...`);
   };
 
-  const gameWon = (row, col) => {
+  const gameEnded = (lastMoveRow, lastMoveCol) => {
+    const curBoard = board.getBoard().map((row) => row.map((cell) => cell.getValue()));
+    console.log(`${curBoard[lastMoveRow][0] === curBoard[lastMoveRow][1]
+        && curBoard[lastMoveRow][1] === curBoard[lastMoveRow][2]}`);
+    if (curBoard[lastMoveRow][0] === curBoard[lastMoveRow][1]
+        && curBoard[lastMoveRow][1] === curBoard[lastMoveRow][2]) { return true; }
 
+    if (curBoard[0][lastMoveCol] === curBoard[1][lastMoveCol]
+        && curBoard[1][lastMoveCol] === curBoard[2][lastMoveCol]) { return true; }
+
+    if (lastMoveRow === lastMoveCol) {
+      if (curBoard[0][0] === curBoard[1][1]
+        && curBoard[1][1] === curBoard[2][2]) { return true; }
+    }
+
+    if (lastMoveRow + 1 === BOARDLENGTH - lastMoveCol) {
+      if (curBoard[2][0] === curBoard[1][1]
+        && curBoard[1][1] === curBoard[0][2]) { return true; }
+    }
+
+    if (movesMade === BOARDLENGTH * BOARDLENGTH) {
+      isTie = true;
+      return true;
+    }
+
+    return false;
   };
 
-  const gameOver = (winner) => {
+  const gameOver = () => {
     isGameOver = true;
-    console.log(`${winner} won the game! Sorry ${waitingPlayer()}...`);
+    if (isTie) {
+      console.log('Over in a tie...');
+    } else {
+      console.log(`${activePlayer.name} won the game! Sorry ${waitingPlayer().name}...`);
+    }
   };
 
   const playRound = (row, col) => {
     if (isGameOver) return;
 
     if (board.markCell(row, col, activePlayer.mark)) {
-      if (gameWon(row, col)) {
-        gameOver(activePlayer);
+      movesMade += 1;
+      if (gameEnded(row, col)) {
+        gameOver();
       } else {
         switchPlayerTurn();
       }
