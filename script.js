@@ -46,10 +46,6 @@ const GameBoard = (() => {
     return true;
   };
 
-  //   const printBoard = () => {
-  //     const boardForConsolePrinting = board.map((row) => row.map((cell) => cell.getValue()));
-  //   };
-
   const reset = () => {
     for (let i = 0; i < BOARDLENGTH; i += 1) {
       for (let j = 0; j < BOARDLENGTH; j += 1) {
@@ -61,15 +57,11 @@ const GameBoard = (() => {
   return {
     getBoard,
     markCell,
-    // printBoard,
     reset,
   };
 })();
 
 const Player = (name, mark) => ({ name, mark });
-
-const player11 = Player('Ash', '×');
-const player22 = Player('Gary', 'O');
 
 const GameController = ((player1, player2) => {
   const board = GameBoard;
@@ -85,11 +77,6 @@ const GameController = ((player1, player2) => {
   };
 
   const getActivePlayer = () => activePlayer;
-
-  //   const printNewRound = () => {
-  //     board.printBoard();
-  //     console.log(`${activePlayer.name}'s turn...`);
-  //   };
 
   const getGameStatus = () => ({ isGameOver, isTie });
 
@@ -107,7 +94,7 @@ const GameController = ((player1, player2) => {
         && curBoard[1][1] === curBoard[2][2]) { return true; }
     }
 
-    if (lastMoveRow + 1 === BOARDLENGTH - lastMoveCol) {
+    if (+lastMoveRow + 1 === BOARDLENGTH - +lastMoveCol) {
       if (curBoard[2][0] === curBoard[1][1]
         && curBoard[1][1] === curBoard[0][2]) { return true; }
     }
@@ -120,27 +107,17 @@ const GameController = ((player1, player2) => {
     return false;
   };
 
-  const gameOver = () => {
-    isGameOver = true;
-    // if (isTie) {
-    //   console.log('Over in a tie...');
-    // } else {
-    //   console.log(`${activePlayer.name} won the game! Sorry ${waitingPlayer().name}...`);
-    // }
-  };
-
   const playRound = (row, col) => {
     if (isGameOver) { return; }
 
     if (board.markCell(row, col, activePlayer.mark)) {
       movesMade += 1;
       if (gameEnded(row, col)) {
-        gameOver();
+        isGameOver = true;
       } else {
         switchPlayerTurn();
       }
     }
-    // printNewRound();
   };
 
   const reset = () => {
@@ -149,7 +126,6 @@ const GameController = ((player1, player2) => {
     isGameOver = false;
     isTie = false;
     movesMade = 0;
-    // printNewRound();
   };
 
   reset();
@@ -161,27 +137,39 @@ const GameController = ((player1, player2) => {
     getBoard: board.getBoard,
     getGameStatus,
   };
-})(player11, player22);
+})(Player('Ash', '×'), Player('Gary', 'O'));
 
 const ScreenController = (() => {
   const game = GameController;
+
   const statusDiv = document.querySelector('.status');
   const boardDiv = document.querySelector('.board');
   const resetBtn = document.querySelector('.reset-btn');
+  let renamePlayer1;
+  let renamePlayer2;
 
   const updateScreen = () => {
     boardDiv.innerHTML = '';
 
     const board = game.getBoard();
-    const activePlayer = game.getActivePlayer();
+    const activePlayer = (() => {
+      const currentPlayer = game.getActivePlayer().name;
+      if (currentPlayer === 'Ash' && renamePlayer1) {
+        return renamePlayer1;
+      } if (currentPlayer === 'Gary' && renamePlayer2) {
+        return renamePlayer2;
+      }
+      return currentPlayer;
+    })();
+
     if (game.getGameStatus().isGameOver) {
       if (game.getGameStatus().isTie) {
         statusDiv.textContent = 'Over in a tie...';
       } else {
-        statusDiv.textContent = `${activePlayer.name} won the game!`;
+        statusDiv.textContent = `${activePlayer} won the game!`;
       }
     } else {
-      statusDiv.textContent = `${activePlayer.name}'s turn...`;
+      statusDiv.textContent = `${activePlayer}'s turn...`;
     }
 
     board.forEach((row, rowIndex) => {
@@ -213,7 +201,12 @@ const ScreenController = (() => {
   }
 
   boardDiv.addEventListener('click', clickHandlerBoard);
-  resetBtn.addEventListener('click', () => {
+  resetBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    const { form } = e.target;
+    renamePlayer1 = form.player1.value;
+    renamePlayer2 = form.player2.value;
+    resetBtn.textContent = 'Reset';
     game.reset();
     updateScreen();
   });
