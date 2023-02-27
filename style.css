@@ -1,0 +1,17 @@
+:root {
+    font-size: 18px;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.board {
+    display: inline-grid;
+    background-color: #000;
+    grid-template-columns: repeat(3, 100px);
+    grid-template-rows: repeat(3, 100px);
+    gap: 0.2rem;
+}

@@ -44,7 +44,6 @@ const GameBoard = (() => {
 
   const printBoard = () => {
     const boardForConsolePrinting = board.map((row) => row.map((cell) => cell.getValue()));
-    console.table(boardForConsolePrinting);
   };
 
   const reset = () => {
@@ -88,6 +87,8 @@ const GameController = ((player1, player2) => {
     console.log(`${activePlayer.name}'s turn...`);
   };
 
+  const getGameStatus = () => ({ isGameOver, isTie });
+
   const gameEnded = (lastMoveRow, lastMoveCol) => {
     const curBoard = board.getBoard().map((row) => row.map((cell) => cell.getValue()));
 
@@ -116,7 +117,7 @@ const GameController = ((player1, player2) => {
   };
 
   const gameOver = () => {
-    isGameOver = activePlayer;
+    isGameOver = true;
     if (isTie) {
       console.log('Over in a tie...');
     } else {
@@ -125,7 +126,7 @@ const GameController = ((player1, player2) => {
   };
 
   const playRound = (row, col) => {
-    if (isGameOver) return;
+    if (isGameOver) { return; }
 
     if (board.markCell(row, col, activePlayer.mark)) {
       movesMade += 1;
@@ -153,5 +154,59 @@ const GameController = ((player1, player2) => {
     playRound,
     getActivePlayer,
     reset,
+    getBoard: board.getBoard,
+    getGameStatus,
   };
 })(player11, player22);
+
+const ScreenController = (() => {
+  const game = GameController;
+  const statusDiv = document.querySelector('.status');
+  const boardDiv = document.querySelector('.board');
+  const resetBtn = document.querySelector('.reset-btn');
+
+  const updateScreen = () => {
+    boardDiv.innerHTML = '';
+
+    const board = game.getBoard();
+    const activePlayer = game.getActivePlayer();
+    if (game.getGameStatus().isGameOver) {
+      if (game.getGameStatus().isTie) {
+        statusDiv.textContent = 'Over in a tie...';
+      } else {
+        statusDiv.textContent = `${activePlayer.name} won the game!`;
+      }
+    } else {
+      statusDiv.textContent = `${activePlayer.name}'s turn...`;
+    }
+
+    board.forEach((row, rowIndex) => {
+      row.forEach((cell, colIndex) => {
+        const cellBtn = document.createElement('button');
+        cellBtn.classList.add('cell');
+        cellBtn.dataset.row = rowIndex;
+        cellBtn.dataset.col = colIndex;
+        cellBtn.textContent = cell.isEmpty() ? '' : cell.getValue();
+
+        boardDiv.appendChild(cellBtn);
+      });
+    });
+  };
+
+  function clickHandlerBoard(e) {
+    const selectedRow = e.target.dataset.row;
+    const selectedColumn = e.target.dataset.col;
+
+    if (selectedRow && selectedColumn) {
+      game.playRound(selectedRow, selectedColumn);
+      updateScreen();
+    }
+  }
+
+  boardDiv.addEventListener('click', clickHandlerBoard);
+  resetBtn.addEventListener('click', () => {
+    game.reset();
+    updateScreen();
+  });
+  updateScreen();
+})();
