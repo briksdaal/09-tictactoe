@@ -47,10 +47,19 @@ const GameBoard = (() => {
     console.table(boardForConsolePrinting);
   };
 
+  const reset = () => {
+    for (let i = 0; i < BOARDLENGTH; i += 1) {
+      for (let j = 0; j < BOARDLENGTH; j += 1) {
+        board[i][j].changeCell('-');
+      }
+    }
+  };
+
   return {
     getBoard,
     markCell,
     printBoard,
+    reset,
   };
 })();
 
@@ -61,10 +70,10 @@ const player22 = Player('Gary', 'O');
 
 const GameController = ((player1, player2) => {
   const board = GameBoard;
-  let activePlayer = player1;
-  let isGameOver = false;
-  let isTie = false;
-  let movesMade = 0;
+  let activePlayer;
+  let isGameOver;
+  let isTie;
+  let movesMade;
 
   const waitingPlayer = () => (activePlayer === player1 ? player2 : player1);
 
@@ -81,8 +90,7 @@ const GameController = ((player1, player2) => {
 
   const gameEnded = (lastMoveRow, lastMoveCol) => {
     const curBoard = board.getBoard().map((row) => row.map((cell) => cell.getValue()));
-    console.log(`${curBoard[lastMoveRow][0] === curBoard[lastMoveRow][1]
-        && curBoard[lastMoveRow][1] === curBoard[lastMoveRow][2]}`);
+
     if (curBoard[lastMoveRow][0] === curBoard[lastMoveRow][1]
         && curBoard[lastMoveRow][1] === curBoard[lastMoveRow][2]) { return true; }
 
@@ -108,7 +116,7 @@ const GameController = ((player1, player2) => {
   };
 
   const gameOver = () => {
-    isGameOver = true;
+    isGameOver = activePlayer;
     if (isTie) {
       console.log('Over in a tie...');
     } else {
@@ -130,10 +138,20 @@ const GameController = ((player1, player2) => {
     printNewRound();
   };
 
-  printNewRound();
+  const reset = () => {
+    board.reset();
+    activePlayer = player1;
+    isGameOver = false;
+    isTie = false;
+    movesMade = 0;
+    printNewRound();
+  };
+
+  reset();
 
   return {
     playRound,
     getActivePlayer,
+    reset,
   };
 })(player11, player22);
