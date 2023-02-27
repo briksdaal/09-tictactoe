@@ -64,7 +64,7 @@ const GameBoard = (() => {
 
 const Player = (name, mark) => ({ name, mark });
 
-const player11 = Player('Ash', 'X');
+const player11 = Player('Ash', '×');
 const player22 = Player('Gary', 'O');
 
 const GameController = ((player1, player2) => {
@@ -186,7 +186,12 @@ const ScreenController = (() => {
         cellBtn.classList.add('cell');
         cellBtn.dataset.row = rowIndex;
         cellBtn.dataset.col = colIndex;
-        cellBtn.textContent = cell.isEmpty() ? '' : cell.getValue();
+        if (cell.isEmpty()) {
+          cellBtn.dataset.sign = 'empty';
+        } else {
+          cellBtn.dataset.sign = cell.getValue() === 'O' ? 'circle' : 'ex';
+          cellBtn.textContent = cell.getValue();
+        }
 
         boardDiv.appendChild(cellBtn);
       });
