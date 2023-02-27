@@ -1,7 +1,8 @@
 const BOARDLENGTH = 3;
 
 const Cell = () => {
-  let value = '-';
+  const emptyVal = '-';
+  let value = emptyVal;
 
   const changeCell = (playerMark) => {
     value = playerMark;
@@ -9,12 +10,15 @@ const Cell = () => {
 
   const getValue = () => value;
 
-  const isEmpty = () => value === '-';
+  const isEmpty = () => value === emptyVal;
+
+  const reset = () => { value = emptyVal; };
 
   return {
     changeCell,
     getValue,
     isEmpty,
+    reset,
   };
 };
 
@@ -42,14 +46,14 @@ const GameBoard = (() => {
     return true;
   };
 
-  const printBoard = () => {
-    const boardForConsolePrinting = board.map((row) => row.map((cell) => cell.getValue()));
-  };
+  //   const printBoard = () => {
+  //     const boardForConsolePrinting = board.map((row) => row.map((cell) => cell.getValue()));
+  //   };
 
   const reset = () => {
     for (let i = 0; i < BOARDLENGTH; i += 1) {
       for (let j = 0; j < BOARDLENGTH; j += 1) {
-        board[i][j].changeCell('-');
+        board[i][j].reset();
       }
     }
   };
@@ -57,7 +61,7 @@ const GameBoard = (() => {
   return {
     getBoard,
     markCell,
-    printBoard,
+    // printBoard,
     reset,
   };
 })();
@@ -82,10 +86,10 @@ const GameController = ((player1, player2) => {
 
   const getActivePlayer = () => activePlayer;
 
-  const printNewRound = () => {
-    board.printBoard();
-    console.log(`${activePlayer.name}'s turn...`);
-  };
+  //   const printNewRound = () => {
+  //     board.printBoard();
+  //     console.log(`${activePlayer.name}'s turn...`);
+  //   };
 
   const getGameStatus = () => ({ isGameOver, isTie });
 
@@ -118,11 +122,11 @@ const GameController = ((player1, player2) => {
 
   const gameOver = () => {
     isGameOver = true;
-    if (isTie) {
-      console.log('Over in a tie...');
-    } else {
-      console.log(`${activePlayer.name} won the game! Sorry ${waitingPlayer().name}...`);
-    }
+    // if (isTie) {
+    //   console.log('Over in a tie...');
+    // } else {
+    //   console.log(`${activePlayer.name} won the game! Sorry ${waitingPlayer().name}...`);
+    // }
   };
 
   const playRound = (row, col) => {
@@ -136,7 +140,7 @@ const GameController = ((player1, player2) => {
         switchPlayerTurn();
       }
     }
-    printNewRound();
+    // printNewRound();
   };
 
   const reset = () => {
@@ -145,7 +149,7 @@ const GameController = ((player1, player2) => {
     isGameOver = false;
     isTie = false;
     movesMade = 0;
-    printNewRound();
+    // printNewRound();
   };
 
   reset();
