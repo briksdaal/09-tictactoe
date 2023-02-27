@@ -54,16 +54,18 @@ const GameBoard = (() => {
 
 const Player = (name, mark) => ({ name, mark });
 
-const player1 = Player('Ash', 'X');
-const player2 = Player('Gary', 'O');
+const player11 = Player('Ash', 'X');
+const player22 = Player('Gary', 'O');
 
 const GameController = ((player1, player2) => {
   const board = GameBoard;
-
+  let isGameOver = false;
   let activePlayer = player1;
 
+  const waitingPlayer = () => (activePlayer === player1 ? player2 : player1);
+
   const switchPlayerTurn = () => {
-    activePlayer = activePlayer === player1 ? player2 : player1;
+    activePlayer = waitingPlayer();
   };
 
   const getActivePlayer = () => activePlayer;
@@ -73,9 +75,24 @@ const GameController = ((player1, player2) => {
     console.log(`${activePlayer.name}'s turn...`);
   };
 
+  const gameWon = (row, col) => {
+
+  };
+
+  const gameOver = (winner) => {
+    isGameOver = true;
+    console.log(`${winner} won the game! Sorry ${waitingPlayer()}...`);
+  };
+
   const playRound = (row, col) => {
+    if (isGameOver) return;
+
     if (board.markCell(row, col, activePlayer.mark)) {
-      switchPlayerTurn();
+      if (gameWon(row, col)) {
+        gameOver(activePlayer);
+      } else {
+        switchPlayerTurn();
+      }
     }
     printNewRound();
   };
@@ -86,4 +103,4 @@ const GameController = ((player1, player2) => {
     playRound,
     getActivePlayer,
   };
-})(player1, player2);
+})(player11, player22);
